@@ -1,10 +1,10 @@
 import logging
 import os
 import sys
-from typing import Any
+from typing import Any, Annotated
 
 import requests
-from fastapi import FastAPI, BackgroundTasks, Body
+from fastapi import FastAPI, BackgroundTasks, Body, Header, HTTPException
 from openai import OpenAI
 
 logger = logging.getLogger("transcribe-bot")
@@ -19,6 +19,7 @@ app = FastAPI(docs_url=None, redoc_url=None)
 
 client = OpenAI(api_key=os.getenv("OPEN_AI_API_KEY"))
 token = os.getenv("TELEGRAM_BOT_TOKEN")
+webhook_secret = os.getenv("TELEGRAM_WEBHOOK_SECRET")
 
 
 def send_message(chat_id: str, text: str, replay_to_message_id: str | None = None) -> None:
@@ -65,9 +66,15 @@ def process_audio(task: AudioProcessingTask) -> None:
 
 
 @app.post("/l4me_bot/webhook")
-async def handle_webhook(background_tasks: BackgroundTasks, payload: Any = Body(None)):
+async def handle_webhook(background_tasks: BackgroundTasks,
+                         x_telegram_bot_api_secret_token: Annotated[str | None, Header()] = None,
+                         payload: Any = Body(None)):
     # TODO: work on logging
     logger.info("Received payload: %s", payload)
+
+    if x_telegram_bot_api_secret_token != webhook_secret:
+        logger.error("Invalid secret token provided: %s", x_telegram_bot_api_secret_token)
+        raise HTTPException(status_code=400, detail="Invalid secret token provided")
 
     message = payload["message"]
     chat_id = str(message["chat"]["id"])
