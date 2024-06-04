@@ -1,29 +1,21 @@
-import logging
 import os
-import sys
 from typing import Any, Annotated
 
 import requests
-from fastapi import FastAPI, BackgroundTasks, Body, Header, HTTPException
-from openai import OpenAI
+from fastapi import BackgroundTasks, Body, Header, HTTPException, APIRouter
 
-logger = logging.getLogger("transcribe-bot")
-logger.setLevel(logging.DEBUG)
+from ..dependecies import get_console_logger, transcribe_audio
 
-console_log_handler = logging.StreamHandler(sys.stdout)
-console_log_handler.setFormatter(logging.Formatter("%(asctime)s.%(msecs)03.0f [%(threadName)s] %(levelname)s %(module)s - %(message)s",
-                                                   "%Y-%m-%d %H:%M:%S"))
-logger.addHandler(console_log_handler)
+router = APIRouter(prefix="/telegram", tags=["telegram"])
 
-app = FastAPI(docs_url=None, redoc_url=None)
+logger = get_console_logger("transcribe-bot-telegram")
 
-client = OpenAI(api_key=os.getenv("OPEN_AI_API_KEY"))
 token = os.getenv("TELEGRAM_BOT_TOKEN")
 webhook_secret = os.getenv("TELEGRAM_WEBHOOK_SECRET")
 
 
-def send_message(chat_id: str, text: str, replay_to_message_id: str | None = None) -> None:
-    if replay_to_message_id is None:
+def send_message(chat_id: str, text: str, reply_to_message_id: str | None = None) -> None:
+    if reply_to_message_id is None:
         data = {
             "chat_id": chat_id,
             "text": text
@@ -33,7 +25,7 @@ def send_message(chat_id: str, text: str, replay_to_message_id: str | None = Non
             "chat_id": chat_id,
             "text": text,
             "reply_parameters": {
-                "message_id": replay_to_message_id
+                "message_id": reply_to_message_id
             }
         }
     response = requests.post(f"https://api.telegram.org/bot{token}/sendMessage", json=data)
@@ -61,17 +53,14 @@ def process_audio(task: AudioProcessingTask) -> None:
     file_path = response.json()["result"]["file_path"]
     file_content = load_file_content(f"https://api.telegram.org/file/bot{token}/{file_path}")
 
-    transcription = client.audio.transcriptions.create(model="whisper-1", file=(file_path.split("/")[-1], file_content))
-    send_message(task.chat_id, transcription.text, task.message_id)
+    transcription = transcribe_audio(file_path.split("/")[-1], file_content)
+    send_message(task.chat_id, transcription, task.message_id)
 
 
-@app.post("/l4me_bot/webhook")
+@router.post("/l4me_bot/webhook")
 async def handle_webhook(background_tasks: BackgroundTasks,
                          x_telegram_bot_api_secret_token: Annotated[str | None, Header()] = None,
                          payload: Any = Body(None)):
-    # TODO: work on logging
-    logger.info("Received payload: %s", payload)
-
     if x_telegram_bot_api_secret_token != webhook_secret:
         logger.error("Invalid secret token provided: %s", x_telegram_bot_api_secret_token)
         raise HTTPException(status_code=400, detail="Invalid secret token provided")
