@@ -2,9 +2,12 @@ import os
 from typing import Any, Annotated
 
 import requests
+from dotenv import load_dotenv
 from fastapi import BackgroundTasks, Body, Query, HTTPException, APIRouter
 
 from ..dependecies import transcribe_audio, get_console_logger
+
+load_dotenv()
 
 router = APIRouter(prefix="/whatsapp", tags=["whatsapp"])
 

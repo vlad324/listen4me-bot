@@ -15,9 +15,11 @@ There is an option to run the bot only for one of the platforms (Telegram or Wha
 ### Prerequisites
 
 1. OpenAI API key. You can get it by signing up on the [Open AI website](https://platform.openai.com/signup).
-2. Telegram bot token. You can create a new bot using [@BotFather](https://t.me/botfather).
+2. Telegram bot token. You can create a new bot using [@BotFather](https://t.me/botfather). If you plan to run the bot only for WhatsApp,
+   you can omit this step.
 3. WhatsApp API key and phone number id. You can get it by creating WhatsApp app
-   on [Meta for Developers](https://developers.facebook.com/apps) platform.
+   on [Meta for Developers](https://developers.facebook.com/apps) platform. If you plan to run the bot only for Telegram, you can omit this
+   step.
 4. Two random string. First one to use as a webhook secret for Telegram, and the second one for verify token for WhatsApp.
 
 ### Local run with ngrok endpoint

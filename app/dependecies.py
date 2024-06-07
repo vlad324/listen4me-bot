@@ -2,7 +2,10 @@ import logging
 import os
 import sys
 
+from dotenv import load_dotenv
 from openai import OpenAI
+
+load_dotenv()
 
 
 def get_console_logger(name: str) -> logging.Logger:

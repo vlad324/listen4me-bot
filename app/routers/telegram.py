@@ -2,9 +2,12 @@ import os
 from typing import Any, Annotated
 
 import requests
+from dotenv import load_dotenv
 from fastapi import BackgroundTasks, Body, Header, HTTPException, APIRouter
 
 from ..dependecies import get_console_logger, transcribe_audio
+
+load_dotenv()
 
 router = APIRouter(prefix="/telegram", tags=["telegram"])
 
