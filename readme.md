@@ -22,7 +22,9 @@ There is an option to run the bot only for one of the platforms (Telegram or Wha
    step.
 4. Two random string. First one to use as a webhook secret for Telegram, and the second one for verify token for WhatsApp.
 
-### Local run with ngrok endpoint
+There are several ways to run the bot locally:
+<details>
+<summary><b>Local run with ngrok endpoint</b></summary>
 
 1. Clone the repository:
 
@@ -80,6 +82,67 @@ curl -X POST --location "https://api.telegram.org/bot<BOT_TOKEN>/setWebhook" \
 
 7. Use Meta for Developers platform to set the webhook for WhatsApp bot. URL should be `<url_provided_by_ngrok>/whatsapp/l4me_bot/webhook`
    and verify token should be `<second_random_string_generated_in_prerequisites_section>`.
+
+</details>
+
+<details>
+<summary><b>Local run with Docker and ngrok endpoint</b></summary>
+
+1. Clone the repository:
+
+```bash
+git clone https://github.com/vlad324/listen4me-bot
+```
+
+2. Build the Docker image:
+
+```bash
+docker build -t listen4me-bot .
+```
+
+3. Create a `.env` file in the root of the project and specify the following environment variables in it:
+
+```
+OPEN_AI_API_KEY=your_open_ai_api_key
+
+TELEGRAM_BOT_TOKEN=your_telegram_bot_token
+TELEGRAM_WEBHOOK_SECRET=first_random_string_generated_in_prerequisites_section
+
+WA_API_KEY=api_key_of_your_whatsapp_app
+WA_PHONE_NUMBER_ID=phone_number_id_of_your_whatsapp_app
+WA_VERIFY_TOKEN=second_random_string_generated_in_prerequisites_section
+```
+
+If you plan to run the bot only for Telegram or WhatsApp, you can omit the corresponding variables. `OPEN_AI_API_KEY` is required for both
+platforms.
+
+4. Run the Docker container:
+
+```bash
+docker run --env-file .env -p 8080:8080 listen4me-bot
+```
+
+5. Using `ngrok`, expose your local server to the internet:
+
+```bash
+ngrok http 8080
+```
+
+6. Set the webhook for Telegram the bot:
+
+```bash
+curl -X POST --location "https://api.telegram.org/bot<BOT_TOKEN>/setWebhook" \
+    -H "Content-Type: application/json" \
+    -d '{
+          "url": "<url_provided_by_ngrok>/telegram/l4me_bot/webhook",
+          "secret_token": "<first_random_string_generated_in_prerequisites_section>"
+        }'
+```
+
+7. Use Meta for Developers platform to set the webhook for WhatsApp bot. URL should be `<url_provided_by_ngrok>/whatsapp/l4me_bot/webhook`
+   and verify token should be `<second_random_string_generated_in_prerequisites_section>`.
+
+</details>
 
 ### Deployment to [fly.io](https://fly.io)
 
