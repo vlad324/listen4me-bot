@@ -39,14 +39,14 @@ pip install -r requirements.txt
 3. Create a `.env` file in the root of the project and specify the following environment variables in it:
 
 ```
-OPEN_AI_API_KEY="your_open_ai_api_key"
+OPEN_AI_API_KEY=your_open_ai_api_key
 
-TELEGRAM_BOT_TOKEN="your_telegram_bot_token"
-TELEGRAM_WEBHOOK_SECRET="first_random_string_generated_in_prerequisites_section"
+TELEGRAM_BOT_TOKEN=your_telegram_bot_token
+TELEGRAM_WEBHOOK_SECRET=first_random_string_generated_in_prerequisites_section
 
-WA_API_KEY="api_key_of_your_whatsapp_app"
-WA_PHONE_NUMBER_ID="phone_number_id_of_your_whatsapp_app"
-WA_VERIFY_TOKEN="second_random_string_generated_in_prerequisites_section"
+WA_API_KEY=api_key_of_your_whatsapp_app
+WA_PHONE_NUMBER_ID=phone_number_id_of_your_whatsapp_app
+WA_VERIFY_TOKEN=second_random_string_generated_in_prerequisites_section
 ```
 
 If you plan to run the bot only for Telegram or WhatsApp, you can omit the corresponding variables. `OPEN_AI_API_KEY` is required for both
@@ -55,7 +55,7 @@ platforms.
 4. Run the bot:
 
 ```bash
-fastapi run main.py --port 8000
+fastapi run app/main.py --port 8000
 ```
 
 The bot will be waiting for webhooks at `http://localhost:8000/telegram/l4me_bot/webhook` for Telegram
