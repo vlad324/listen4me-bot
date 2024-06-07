@@ -25,4 +25,7 @@ client = OpenAI(api_key=os.getenv("OPEN_AI_API_KEY"))
 
 def transcribe_audio(file_name: str, file_content: bytes) -> str:
     transcription = client.audio.transcriptions.create(model="whisper-1", file=(file_name, file_content))
+    if transcription.text == "":
+        return "Sorry, the audio file has no speech."
+
     return transcription.text
