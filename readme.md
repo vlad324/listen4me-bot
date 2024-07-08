@@ -200,3 +200,39 @@ curl -X POST --location "https://api.telegram.org/bot<BOT_TOKEN>/setWebhook" \
 
 7. Use Meta for Developers platform to set the webhook for WhatsApp bot. URL should be `<url_provided_by_fly_io>/whatsapp/l4me_bot/webhook`
    and verify token should be `<second_random_string_generated_in_prerequisites_section>`.
+
+## Restricting access to your Telegram bot
+
+To limit access to your version of the Telegram bot, you'll need to know your Telegram id or the Telegram ids of users you want to grant
+access to.
+Here's how to obtain this information:
+
+1. Start a conversation with [@GetIDs Bot](https://t.me/getidsbot) on Telegram.
+2. The bot will send you a message containing your Telegram id. Copy this id.
+
+Once you have the necessary ids, follow these steps to restrict access:
+
+### For local deployment:
+
+Add the following line to your `.env` file:
+
+```
+TELEGRAM_ALLOWED_USER_IDS=<id_1,id_2,...>
+```
+
+Replace `<id_1,id_2,...>` with a single Telegram ID or a comma-separated list of allowed Telegram IDs. For example:
+
+- For a single user: `TELEGRAM_ALLOWED_USER_IDS=123456789`
+- For multiple users: `TELEGRAM_ALLOWED_USER_IDS=123456789,987654321`
+
+### For fly.io deployment:
+
+Execute the following command:
+
+```bash
+flyctl secrets set TELEGRAM_ALLOWED_USER_IDS=<id_1,id_2,...>
+```
+
+Replace `<id_1,id_2,...>` with the comma-separated list of Telegram IDs for users you want to allow access to your bot.
+
+By setting this environment variable, you'll ensure that only specified users can interact with your Telegram bot.

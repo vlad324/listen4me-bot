@@ -15,6 +15,7 @@ logger = get_console_logger("transcribe-bot-telegram")
 
 token = os.getenv("TELEGRAM_BOT_TOKEN")
 webhook_secret = os.getenv("TELEGRAM_WEBHOOK_SECRET")
+allowed_user_ids = set(map(int, os.getenv("TELEGRAM_ALLOWED_USER_IDS").split(","))) if os.getenv("TELEGRAM_ALLOWED_USER_IDS") else None
 
 
 def send_message(chat_id: str, text: str, reply_to_message_id: str | None = None) -> None:
@@ -71,6 +72,13 @@ async def handle_webhook(background_tasks: BackgroundTasks,
     message = payload["message"]
     chat_id = str(message["chat"]["id"])
     message_id = str(message["message_id"])
+    user_id = message["from"]["id"]
+
+    if allowed_user_ids and user_id not in allowed_user_ids:
+        logger.warning(f"Unauthorized access attempt from user {user_id}")
+        send_message(chat_id, "Sorry, you are not authorized to use this bot.")
+        return {}
+
     if message.get("voice"):
         voice = message["voice"]
         task = AudioProcessingTask(chat_id, message_id, voice["file_id"])
@@ -79,7 +87,6 @@ async def handle_webhook(background_tasks: BackgroundTasks,
         video_note = message["video_note"]
         task = AudioProcessingTask(chat_id, message_id, video_note["file_id"])
         background_tasks.add_task(process_audio, task)
-        pass
     elif message.get("text") == "/start":
         send_message(chat_id, "Hello there! 👋 Send or forward me a voice message and I will transcribe it for you.")
     else:
